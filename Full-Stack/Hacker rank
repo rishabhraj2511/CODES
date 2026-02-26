@@ -1,59 +1,56 @@
+function sum(transactions) {
+    return transactions.reduce((acc, curr) => {
+        if (curr.amount > 0) {
+            acc.income += curr.amount;
+        } else {
+            acc.expense += Math.abs(curr.amount);
+        }
+        return acc;
+    }, { income: 0, expense: 0 });
+}
+function handleSubmit(text, amount, transactions) {
+    if (!text || amount === 0) return transactions;
+
+    let maxId = transactions.length > 0
+        ? Math.max(...transactions.map(t => t.id))
+        : 0;
+    let newTransaction = {
+        id: maxId + 1,
+        text: text,
+        amount: amount
+    };
+
+    return [...transactions, newTransaction];
+}
+
+function renderTransactions(transactions) {
+    return transactions.map(t => `${t.text} : ${t.amount}`);
+}
+
+function deleteTransaction(transactions, id) {
+    return transactions.filter(t => t.id !== id);
+}
+
 function processData(input) {
+    let lines = input.trim().split("\n");
+    let index = 0;
 
-    input = input.trim().split("\n");
-    let i = 0;
-
-    function sum(arr) {
-        let income = 0, expense = 0;
-
-        arr.forEach(t => {
-            if (t.amount > 0) income += t.amount;
-            else expense += Math.abs(t.amount);
-        });
-
-        return { income: income, expense: expense };
-    }
-
-    function handleSubmit(text, amount, arr) {
-        if (text === "" || amount === 0) return arr;
-
-        let maxId = 0;
-        arr.forEach(t => {
-            if (t.id > maxId) maxId = t.id;
-        });
-
-        let newT = {
-            id: maxId + 1,
-            text: text,
-            amount: amount
-        };
-
-        return arr.concat(newT);
-    }
-
-    function renderTransactions(arr) {
-        return arr.map(t => t.text + " : " + t.amount);
-    }
-
-    function deleteTransaction(arr, id) {
-        return arr.filter(t => t.id != id);
-    }
-
-    let n = parseInt(input[i++]);
+    let n = parseInt(lines[index++]);
     let transactions = [];
 
-    for (let j = 0; j < n; j++) {
-        let parts = input[i++].split(" ");
+    // Initial transactions
+    for (let i = 0; i < n; i++) {
+        let [text, amount] = lines[index++].split(" ");
         transactions.push({
-            id: j + 1,
-            text: parts[0],
-            amount: Number(parts[1])
+            id: i + 1,
+            text: text,
+            amount: Number(amount)
         });
     }
 
-    let newText = input[i++];
-    let newAmount = Number(input[i++]);
-    let deleteId = Number(input[i++]);
+    let newText = lines[index++];
+    let newAmount = Number(lines[index++]);
+    let deleteId = Number(lines[index++]);
 
     transactions = handleSubmit(newText, newAmount, transactions);
     transactions = deleteTransaction(transactions, deleteId);
@@ -61,16 +58,20 @@ function processData(input) {
     let totals = sum(transactions);
     let renderedList = renderTransactions(transactions);
 
-    console.log(JSON.stringify({
+    let output = {
         transactions: transactions,
         totals: totals,
         renderedList: renderedList
-    }));
+    };
+
+    console.log(JSON.stringify(output));
 }
 
+// Input handling (same)
 process.stdin.resume();
 process.stdin.setEncoding("ascii");
-_input = "";
+let _input = "";
+
 process.stdin.on("data", function (input) {
     _input += input;
 });
